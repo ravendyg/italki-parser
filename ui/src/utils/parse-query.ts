@@ -1,20 +1,23 @@
-export function parseQuery<T>(args: Set<string>): Partial<T> {
+export function parseQuery<T>(args: {[key: string]: boolean}): T | null {
   // @ts-ignore
   const loc = window.location;
-  if (!loc.search) {
-    return {};
-  }
-
   const res: any = {};
+
   loc.search
-    .slice(1, loc.search.length)
+    .replace(/^\?/, '')
     .split('&')
     .map(item => item.split('='))
     .forEach(([key, val]) => {
-      if (args.has(key)) {
+      if (typeof args[key] === 'boolean') {
         res[key] = val;
       }
     });
+
+  for (const key of Object.keys(args)) {
+    if (args[key] && !res[key]) {
+      return null;
+    }
+  }
 
   return res;
 }

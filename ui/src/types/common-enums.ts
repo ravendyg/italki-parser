@@ -7,4 +7,11 @@ export enum ELanguage {
 
 export enum ECountry {
   RUSSIA = 'RU',
+  ITALY = 'IT',
+}
+
+export enum EPeriod {
+  WEEK = 'week',
+  MONTH = 'month',
+  MONTHS = 'MONTHS',
 }

@@ -1,10 +1,21 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import { LoadController } from './controllers/load.controller';
+import { DbService } from './services/db.service';
+import { NewDate } from './services/newDate.service';
+import { Parser } from './services/parser.service';
+import { Logger } from './services/logger.service';
+import { Crypto } from './services/crypto.service';
+import { Http } from './services/http.service';
 
 @Module({
-  imports: [],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [LoadController],
+  providers: [
+    Crypto,
+    DbService,
+    Http,
+    Logger,
+    NewDate,
+    Parser,
+  ],
 })
 export class AppModule {}
