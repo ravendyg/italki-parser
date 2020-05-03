@@ -21,8 +21,15 @@ export class NewDate {
     return this.weekToDate(this.getWeekNumber(d));
   }
 
-  removeTime(d: Date) {
-    return d.toISOString().slice(0, 10);
+  removeTime(date: Date) {
+    let [m, d, y] = date.toLocaleDateString().split('/');
+    if (d.length === 1) {
+      d = '0' + d;
+    }
+    if (m.length === 1) {
+      m = '0' + m;
+    }
+    return `${y}-${m}-${d}`;
   }
 
   getSearchPeriod(period: EPeriod): [Date, Date] {

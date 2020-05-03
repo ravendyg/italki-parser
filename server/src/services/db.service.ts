@@ -52,8 +52,7 @@ const makeGetLessonsQuery = (ids: number[]) => {
     SELECT
       teacher,
       date,
-      total,
-      work
+      total
     FROM lessons
     WHERE
       teacher IN (${ids.join(',')})
@@ -97,8 +96,8 @@ const CREATE_LANGUAGE_QUERY = `
 
 const CREATE_LESSONS_QUERY = `
   INSERT INTO lessons
-    (teacher, date, total, work)
-  VALUES ($1, $2, $3, $4)
+    (teacher, date, total)
+  VALUES ($1, $2, $3)
   ON CONFLICT (teacher, date) DO NOTHING
 ;`;
 
@@ -161,16 +160,12 @@ export class DbService {
       }
       const getLessongArgs = [from, to];
       const getLessonsQuery = makeGetLessonsQuery(teachers);
-      console.log(getLessonsQuery, getLessongArgs)
       const lesRes = await client.query(getLessonsQuery, getLessongArgs);
 
       // format
       for (const row of lesRes.rows) {
         const lessons = teachersMap.get(row.teacher);
-        lessons[this.newDate.removeTime(row.date)] = {
-          t: row.total,
-          w: row.work,
-        };
+        lessons[this.newDate.removeTime(row.date)] = row.total;
       }
       for (const teacher of resGet.rows) {
         const teacherDto: ITeacherDto = {
@@ -258,12 +253,12 @@ export class DbService {
 
   async createLessons(
     teacherId: number,
-    acc: Map<string, {t: number, w: number}>,
+    acc: Map<string, number>,
   ) {
     const client = await pgPool.connect();
     try {
-      for (const [key, { t, w }] of acc.entries()) {
-        const args = [teacherId, new Date(key), t, w];
+      for (const [key, hours] of acc.entries()) {
+        const args = [teacherId, new Date(key), hours];
         await client.query(CREATE_LESSONS_QUERY, args);
       }
     } catch (e) {

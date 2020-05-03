@@ -106,29 +106,12 @@ export class Parser {
         const schedule = await this.http.getSchedule(job);
         console.log(schedule);
         if (schedule) {
-          const acc = new Map<string, { t: number, w: number }>();
-          for (const item of schedule.available_schedule) {
-            const key = item.start_time.slice(0, 10);
-            // @ts-ignore
-            const diff = (new Date(item.end_time) - new Date(item.start_time)) / constants.HOUR;
-            let holder = acc.get(key);
-            if (!holder) {
-              holder = { t: 0, w: 0 };
-              acc.set(key, holder);
-            }
-            holder.t += diff;
-          }
+          const acc = new Map<string, number>();
           for (const item of schedule.teacher_lesson) {
             const key = item.start_time.slice(0, 10);
             // @ts-ignore
             const diff = Math.round((new Date(item.end_time) - new Date(item.start_time)) / constants.HOUR * 100);
-            let holder = acc.get(key);
-            if (!holder) {
-              holder = { t: 0, w: 0 };
-              acc.set(key, holder);
-            }
-            holder.t += diff;
-            holder.w += diff;
+            acc.set(key, (acc.get(key) || 0) + diff);
           }
 
           await this.dbService.createLessons(job.id, acc);

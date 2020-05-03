@@ -63,7 +63,6 @@ CREATE TABLE lessons (
   teacher INT NOT NULL,
   date date,
   total SMALLINT,
-  work SMALLINT,
   FOREIGN KEY (teacher) REFERENCES teachers (id) ON DELETE CASCADE
 );
 

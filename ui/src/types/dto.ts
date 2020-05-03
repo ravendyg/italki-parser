@@ -11,10 +11,7 @@ export interface ISearchDto {
 }
 
 export interface ILessonsDto {
-  [date: string]: {
-    w: number;
-    t: number;
-  };
+  [date: string]: number;
 }
 
 export interface ITeacherDto {
