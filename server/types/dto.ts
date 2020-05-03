@@ -10,21 +10,25 @@ export interface ISearchDto {
   period: EPeriod;
 }
 
-export interface ILoadDto {
-  d: string;
-  t: number;
-  w: number;
+export interface ILessonsDto {
+  [date: string]: {
+    w: number;
+    t: number;
+  };
 }
 
 export interface ITeacherDto {
   id: number;
   name: string;
-  load: ILoadDto[];
+  lessons: ILessonsDto;
 }
 
 export interface ISearchResultDto {
   total: number;
   teachers: ITeacherDto[];
+  from: string;
+  to: string;
+  period: EPeriod;
 }
 
 export interface IItalkiCourseDto {

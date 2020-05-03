@@ -12,8 +12,8 @@ class Http {
     this._base = 'http://localhost:3011';
   }
 
-  async getLoad(params: ISearchDto): Promise<ISearchResultDto | null> {
-    const url = this._base + '/load';
+  async getLessons(params: ISearchDto): Promise<ISearchResultDto | null> {
+    const url = this._base + '/lessons';
     try {
       const res = await axios.get(url, { params });
       return res.data;

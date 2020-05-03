@@ -8,19 +8,14 @@ import { ISearchResultDto, ISearchDto } from '../types/dto';
 import { http } from '../services/http';
 
 
-const emptySearchResult: ISearchResultDto = {
-  teachers: [],
-  total: 0,
-};
-
 function Home() {
   const [isLoading, setLoading] = useState(false);
-  const [data, setData] = useState(emptySearchResult);
+  const [data, setData] = useState(null as ISearchResultDto | null);
 
   const setQuery = async (query: ISearchDto) => {
     if (isLoading || !query) return;
     setLoading(true);
-    const _res = await http.getLoad(query);
+    const _res = await http.getLessons(query);
     if (_res) {
       setData(_res);
     }

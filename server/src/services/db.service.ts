@@ -1,9 +1,19 @@
 import { Injectable } from '@nestjs/common';
 import { Pool } from 'pg';
-import { ELanguage, ECountry, EPeriod } from 'types/common-enums';
+import {
+  ELanguage,
+  ECountry,
+  EPeriod,
+} from 'types/common-enums';
 import { config } from '../config';
-import { ISearchResultDto, ILoadDto, ITeacherDto, IItalkiCourseDto } from 'types/dto';
+import {
+  ISearchResultDto,
+  ITeacherDto,
+  ILessonsDto,
+  IItalkiCourseDto,
+} from 'types/dto';
 import { Logger } from './logger.service';
+import { NewDate } from './newDate.service';
 
 
 const pgPool = new Pool(config.PG_CONFIG);
@@ -39,7 +49,11 @@ const makeCountTeachers = (filterByCountry: boolean) => {
 
 const makeGetLessonsQuery = (ids: number[]) => {
   return `
-    SELECT *
+    SELECT
+      teacher,
+      date,
+      total,
+      work
     FROM lessons
     WHERE
       teacher IN (${ids.join(',')})
@@ -88,35 +102,20 @@ const CREATE_LESSONS_QUERY = `
   ON CONFLICT (teacher, date) DO NOTHING
 ;`;
 
-export interface IGetTeachersLoad {
+export interface IGetTeacherLessons {
   lang: ELanguage;
   period: EPeriod;
   co?: ECountry;
 }
 
-const week = 1000 * 60 * 60 * 24 * 7;
-function getSearchPeriod(period: EPeriod): [Date, Date] {
-  // TODO: calculate
-  const lastMonday = new Date();
-  let diff: number = week;
-  switch (period) {
-    case EPeriod.MONTH: {
-      diff = 4 * week;
-      break;
-    }
-    case EPeriod.MONTHS: {
-      diff = 13 * week;
-      break;
-    }
-  }
-  return [new Date(lastMonday.getTime() - diff), lastMonday];
-}
-
 @Injectable()
 export class DbService {
-  constructor(private logger: Logger) {}
+  constructor(
+    private newDate: NewDate,
+    private logger: Logger,
+  ) {}
 
-  async getTeachersLoad(args: IGetTeachersLoad): Promise<ISearchResultDto> {
+  async getTeacherLessons(args: IGetTeacherLessons): Promise<ISearchResultDto> {
     const {
       lang,
       period,
@@ -125,9 +124,13 @@ export class DbService {
     const countQuery = makeCountTeachers(!!co);
     const getQuery = makeGetTeachersQuery(!!co);
 
+    const [from, to] = this.newDate.getSearchPeriod(period);
     const result: ISearchResultDto = {
       teachers: [],
       total: 0,
+      from: this.newDate.removeTime(from),
+      to: this.newDate.removeTime(to),
+      period,
     };
 
     const client = await pgPool.connect();
@@ -152,11 +155,10 @@ export class DbService {
         return result;
       }
 
-      const teachersMap = new Map();
+      const teachersMap = new Map<number, ILessonsDto>();
       for (const teacherId of teachers) {
-        teachersMap.set(teacherId, []);
+        teachersMap.set(teacherId, {});
       }
-      const [from, to] = getSearchPeriod(period);
       const getLessongArgs = [from, to];
       const getLessonsQuery = makeGetLessonsQuery(teachers);
       console.log(getLessonsQuery, getLessongArgs)
@@ -164,18 +166,16 @@ export class DbService {
 
       // format
       for (const row of lesRes.rows) {
-        const list = teachersMap.get(row.teacher);
-        const loadDto: ILoadDto = {
-          d: row.date,
+        const lessons = teachersMap.get(row.teacher);
+        lessons[this.newDate.removeTime(row.date)] = {
           t: row.total,
-          w: row.with_student,
+          w: row.work,
         };
-        list.push(loadDto);
       }
       for (const teacher of resGet.rows) {
         const teacherDto: ITeacherDto = {
           id: teacher.id,
-          load: teachersMap.get(teacher.id),
+          lessons: teachersMap.get(teacher.id),
           name: teacher.name,
         };
         result.teachers.push(teacherDto);
