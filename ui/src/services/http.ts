@@ -3,13 +3,14 @@ import {
   ISearchDto,
   ISearchResultDto,
 } from '../types/dto';
+import { config } from '../config';
 
 
 class Http {
   private _base: string;
 
   constructor() {
-    this._base = 'http://localhost:3011';
+    this._base = config.baseUrl;
   }
 
   async getLessons(params: ISearchDto): Promise<ISearchResultDto | null> {
