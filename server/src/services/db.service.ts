@@ -47,6 +47,12 @@ const makeCountTeachers = (filterByCountry: boolean) => {
   ;`
 };
 
+const UPDATE_TEACHER_WEEK = `
+  UPDATE teachers
+  SET schedule = $1
+  WHERE id = $2
+;`;
+
 const makeGetLessonsQuery = (ids: number[]) => {
   return `
     SELECT
@@ -254,12 +260,14 @@ export class DbService {
   async createLessons(
     teacherId: number,
     acc: Map<string, number>,
+    week: number,
   ) {
     const client = await pgPool.connect();
     try {
       for (const [key, hours] of acc.entries()) {
         const args = [teacherId, new Date(key), hours];
         await client.query(CREATE_LESSONS_QUERY, args);
+        await client.query(UPDATE_TEACHER_WEEK, [week, teacherId]);
       }
     } catch (e) {
       this.logger.error('createLessons', teacherId, acc, e);

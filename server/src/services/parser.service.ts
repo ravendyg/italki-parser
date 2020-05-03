@@ -114,9 +114,9 @@ export class Parser {
             acc.set(key, (acc.get(key) || 0) + diff);
           }
 
-          await this.dbService.createLessons(job.id, acc);
-
           const nextWeek = job.week + 1;
+          await this.dbService.createLessons(job.id, acc, nextWeek);
+
           if (nextWeek < thisWeek) {
             this.queue.push({
               ...job,
