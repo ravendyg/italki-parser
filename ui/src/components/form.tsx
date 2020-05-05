@@ -150,6 +150,7 @@ export default function Form({
               >
                 <option value={EDisplayMode.VALUES}>Values</option>
                 <option value={EDisplayMode.INCREMENT}>Increment</option>
+                <option value={EDisplayMode.CUMULATIVE}>Cumulative</option>
               </select>
             </div>
           </div>

@@ -21,6 +21,7 @@ const backgroundColors = [
 export enum EDisplayMode {
   VALUES = 'values',
   INCREMENT = 'increment',
+  CUMULATIVE = 'cumulative',
 }
 
 export interface IDatasetItem {
@@ -69,7 +70,6 @@ export function createDataset(
     to,
     period,
   } = data;
-  let step = constants.DAY;
 
   let dateNum = new Date(from).getTime();
   if (displayMode === EDisplayMode.INCREMENT) {
@@ -106,6 +106,7 @@ export function createDataset(
     if (displayMode === EDisplayMode.INCREMENT) {
       date = nextTsp(date, period);
     }
+
     while (date < new Date(to).getTime()) {
       switch (displayMode) {
         case EDisplayMode.INCREMENT: {
@@ -113,6 +114,14 @@ export function createDataset(
           const key = new Date(date).toISOString().slice(0, 10);
           const point = (item.lessons[key] || 0) - (item.lessons[prevKey] || 0);
           _d.data.push(point / 100);
+          break;
+        }
+
+        case EDisplayMode.CUMULATIVE: {
+          const key = new Date(date).toISOString().slice(0, 10);
+          const point = (_d.data[_d.data.length - 1] || 0)
+            + (item.lessons[key] || 0) / 100;
+          _d.data.push(point);
           break;
         }
 

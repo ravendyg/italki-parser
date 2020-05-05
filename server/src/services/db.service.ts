@@ -202,7 +202,7 @@ export class DbService {
         if (!(minTruncatedDate < row.new_date)) {
           minTruncatedDate = row.new_date;
         }
-        lessons[this.newDate.removeTime(row.new_date)] = row.total;
+        lessons[this.newDate.removeTime(row.new_date)] = (+row.total) || 0;
       }
 
       for (const teacher of resGet.rows) {
