@@ -14,4 +14,5 @@ export enum EPeriod {
   WEEK = 'week',
   MONTH = 'month',
   MONTHS = 'MONTHS',
+  YEAR = 'YEAR',
 }

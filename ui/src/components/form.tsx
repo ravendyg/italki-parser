@@ -28,11 +28,6 @@ const countries: ECountry[] = [
   ECountry.RUSSIA,
   // ECountry.ITALY,
 ];
-const periods: EPeriod[] = [
-  EPeriod.WEEK,
-  EPeriod.MONTH,
-  EPeriod.MONTHS,
-];
 const emptySelectionValue = '';
 const defaultLang = localStorage.getItem('italki-def-lang') as ELanguage || ELanguage.ITALIAN;
 const defaultCountry = localStorage.getItem('italki-def-co') as ECountry || emptySelectionValue;
@@ -134,12 +129,10 @@ export default function Form({
                 value={period}
                 onChange={e => setPeriod(e.target.value as any)}
               >
-                {periods.map(period => <option
-                  key={period}
-                  value={period}
-                >{(period === EPeriod.MONTHS
-                  ? '3 MONTHS'
-                  : period.toUpperCase())}</option>)}
+                <option value={EPeriod.WEEK}>Week</option>
+                <option value={EPeriod.MONTH}>4 weeks</option>
+                <option value={EPeriod.MONTHS}>12 weeks</option>
+                <option value={EPeriod.YEAR}>52 weeks</option>
               </select>
             </div>
           </div>

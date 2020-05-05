@@ -1,5 +1,6 @@
 import { constants } from '../constants';
 import { ISearchResultDto } from '../types/dto';
+import { EPeriod } from '../types/common-enums';
 
 
 const backgroundColors = [
@@ -29,6 +30,23 @@ export interface IDatasetItem {
   borderColor?: string;
 }
 
+function nextTsp(tsp: number, period: EPeriod) {
+  switch (period) {
+    case EPeriod.MONTH:
+    case EPeriod.MONTHS: {
+      return tsp + 7 * constants.DAY;
+    }
+    case EPeriod.YEAR: {
+      const _d = new Date(tsp);
+      const _d2 = new Date(_d.setMonth(_d.getMonth() + 1));
+      return _d2.getTime();
+    }
+    default: {
+      return tsp + constants.DAY;
+    }
+  }
+}
+
 let _labels: string[] = [];
 let _datasets: IDatasetItem[] = [];
 let _previousData: ISearchResultDto | null = null;
@@ -49,27 +67,21 @@ export function createDataset(
   const {
     from,
     to,
-    // period,
+    period,
   } = data;
-  let step: number = constants.DAY;
-  // TODO: implement aggregation on the server
-  // switch (period) {
-  //   case EPeriod.MONTHS: {
-  //     step = step * 7; // weeks
-  //     break;
-  //   }
-  // }
-  for (
-    let dateNum = displayMode === EDisplayMode.VALUES
-      ? new Date(from).getTime()
-      : new Date(from).getTime() + step;
-    dateNum <= new Date(to).getTime();
-    dateNum += step
-  ) {
+  let step = constants.DAY;
+
+  let dateNum = new Date(from).getTime();
+  if (displayMode === EDisplayMode.INCREMENT) {
+    dateNum = nextTsp(dateNum, period);
+  }
+  while (dateNum < new Date(to).getTime()) {
     const date = new Date(dateNum)
     const dateStr = date.toISOString().slice(0, 10)
     const dayOfWeek = constants.DAY_OF_WEEK[date.getDay()];
     _labels.push(`${dateStr} (${dayOfWeek})`);
+
+    dateNum = nextTsp(dateNum, period);
   }
 
   const nameCounter: { [key: string]: number } = {};
@@ -88,16 +100,16 @@ export function createDataset(
       backgroundColor: backgroundColors[index % backgroundColors.length],
       borderColor: 'rgba(0, 0, 0, 0)',
     };
-    for (
-      let date = displayMode === EDisplayMode.VALUES
-        ? new Date(from).getTime()
-        : new Date(from).getTime() + step;
-      date <= new Date(to).getTime();
-      date += step
-    ) {
+
+    let prevDate = new Date(from).getTime();
+    let date = prevDate;
+    if (displayMode === EDisplayMode.INCREMENT) {
+      date = nextTsp(date, period);
+    }
+    while (date < new Date(to).getTime()) {
       switch (displayMode) {
         case EDisplayMode.INCREMENT: {
-          const prevKey = new Date(date - step).toISOString().slice(0, 10);
+          const prevKey = new Date(prevDate).toISOString().slice(0, 10);
           const key = new Date(date).toISOString().slice(0, 10);
           const point = (item.lessons[key] || 0) - (item.lessons[prevKey] || 0);
           _d.data.push(point / 100);
@@ -110,7 +122,11 @@ export function createDataset(
           _d.data.push(point / 100);
         }
       }
+
+      date = nextTsp(date, period);
+      prevDate = nextTsp(prevDate, period);
     }
+
     _datasets.push(_d);
   });
 

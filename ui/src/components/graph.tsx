@@ -28,6 +28,15 @@ export default function Graph(props: IGraphProps) {
           labels,
           datasets,
         }}
+        options={{
+          scales: {
+            yAxes: [{
+              ticks: {
+                beginAtZero: true,
+              }
+            }]
+          }
+        }}
       />
     </div>
   </section>;

@@ -22,14 +22,15 @@ export class NewDate {
   }
 
   removeTime(date: Date) {
-    let [m, d, y] = date.toLocaleDateString().split('/');
-    if (d.length === 1) {
-      d = '0' + d;
-    }
-    if (m.length === 1) {
-      m = '0' + m;
-    }
-    return `${y}-${m}-${d}`;
+    return date.toISOString().slice(0, 10);
+    // let [m, d, y] = date.toLocaleDateString().split('/');
+    // if (d.length === 1) {
+    //   d = '0' + d;
+    // }
+    // if (m.length === 1) {
+    //   m = '0' + m;
+    // }
+    // return `${y}-${m}-${d}`;
   }
 
   getSearchPeriod(period: EPeriod): [Date, Date] {
@@ -42,7 +43,11 @@ export class NewDate {
         break;
       }
       case EPeriod.MONTHS: {
-        fromWeek = toWeek - 13;
+        fromWeek = toWeek - 12;
+        break;
+      }
+      case EPeriod.YEAR: {
+        fromWeek = toWeek - 52;
         break;
       }
     }
