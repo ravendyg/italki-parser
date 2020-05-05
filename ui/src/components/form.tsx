@@ -12,21 +12,21 @@ import {
 import { getCountryName } from '../utils/get-country-name';
 
 
-function getSelectCountryFirstOption(currentlySelected: any) {
-  return currentlySelected !== emptySelectionValue
-    ? '-- clear selection --'
-    : '-- select the country --';
-}
+// function getSelectCountryFirstOption(currentlySelected: any) {
+//   return currentlySelected !== emptySelectionValue
+//     ? '-- clear selection --'
+//     : '-- select the country --';
+// }
 
 const languages: ELanguage[] = [
   ELanguage.ITALIAN,
-  ELanguage.RUSSIAN,
-  ELanguage.ENGLISH,
-  ELanguage.CHINESE,
+  // ELanguage.RUSSIAN,
+  // ELanguage.ENGLISH,
+  // ELanguage.CHINESE,
 ];
 const countries: ECountry[] = [
   ECountry.RUSSIA,
-  ECountry.ITALY,
+  // ECountry.ITALY,
 ];
 const periods: EPeriod[] = [
   EPeriod.WEEK,
@@ -67,58 +67,81 @@ export default function Form({
   return <section className='section' id='form'>
     <div className='container'>
       <form onSubmit={handleSubmit}>
-        <div className="field">
-          <label className="label">Language (required)</label>
-          <div className="select">
-            <select
-              value={lang}
-              onChange={e => setLang(e.target.value as any)}
-            >
-              {languages.map(lang => <option
-                key={lang}
-                value={lang}
-              >{lang.toUpperCase()}</option>)}
-            </select>
+
+        <div className="field is-horizontal">
+          <div className="field-label is-normal">
+            <label className="label">Language (required)</label>
+          </div>
+          <div className="field-body">
+            <div className="field">
+              <div className="control">
+                <div className="select">
+                  <select
+                    value={lang}
+                    onChange={e => setLang(e.target.value as any)}
+                  >
+                    {languages.map(lang => <option
+                      key={lang}
+                      value={lang}
+                    >{lang.toUpperCase()}</option>)}
+                  </select>
+                </div>
+              </div>
+              <p className="help">Sorry. Selector is not supported yet.</p>
+            </div>
           </div>
         </div>
 
-        <div className="field">
-          <label className="label">Country (optional)</label>
-          <div className="select">
-            <select
-              value={co}
-              onChange={e => setCo(e.target.value as any)}
-            >
-              <option value={emptySelectionValue}>{getSelectCountryFirstOption(co)}</option>
-              {countries.map(co => {
-                const countryName = getCountryName(co);
-                if (!countryName) {
-                  return null;
-                }
+        <div className="field is-horizontal">
+          <div className="field-label is-normal">
+            <label className="label">Country (optional)</label>
+          </div>
+          <div className="field-body">
+            <div className="field">
+              <div className="control">
+                <div className="select">
+                  <select
+                    value={co}
+                    onChange={e => setCo(e.target.value as any)}
+                  >
+                    {/* <option value={emptySelectionValue}>{getSelectCountryFirstOption(co)}</option> */}
+                    {countries.map(co => {
+                      const countryName = getCountryName(co);
+                      if (!countryName) {
+                        return null;
+                      }
 
-                return <option
-                  key={co}
-                  value={co}
-                >{countryName.toUpperCase()}</option>;
-              })}
-            </select>
+                      return <option
+                        key={co}
+                        value={co}
+                      >{countryName.toUpperCase()}</option>;
+                    })}
+                  </select>
+                </div>
+              </div>
+              <p className="help">Sorry. Selector is not supported yet.</p>
+            </div>
           </div>
         </div>
 
-        <div className="field">
-          <label className="label">Period</label>
-          <div className="select">
-            <select
-              value={period}
-              onChange={e => setPeriod(e.target.value as any)}
-            >
-              {periods.map(period => <option
-                key={period}
+        <div className="field is-horizontal">
+          <div className="field-label is-normal">
+            <label className="label">Period</label>
+          </div>
+          <div className="field-body">
+            <div className="select">
+              <select
                 value={period}
-              >{(period === EPeriod.MONTHS
+                onChange={e => setPeriod(e.target.value as any)}
+              >
+                {periods.map(period => <option
+                  key={period}
+                  value={period}
+                >{(period === EPeriod.MONTHS
                   ? '3 MONTHS'
                   : period.toUpperCase())}</option>)}
-            </select>
+              </select>
+            </div>
           </div>
         </div>
 

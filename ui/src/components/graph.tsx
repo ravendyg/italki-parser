@@ -19,20 +19,6 @@ const backgroundColors = [
   'rgba(204, 122, 156, 0.2)',
   'rgba(219, 116, 125, 0.2)',
 ];
-const borderColors = [
-  'rgba(213, 120, 91, 1)',
-  'rgba(195, 131, 68, 1)',
-  'rgba(167, 144, 59, 1)',
-  'rgba(134, 154, 70, 1)',
-  'rgba(98, 160, 96, 1)',
-  'rgba(64, 162, 128, 1)',
-  'rgba(50, 161, 159, 1)',
-  'rgba(81, 156, 180, 1)',
-  'rgba(129, 146, 188, 1)',
-  'rgba(172, 133, 179, 1)',
-  'rgba(204, 122, 156, 1)',
-  'rgba(219, 116, 125, 1)',
-];
 
 interface IDatasetItem {
   label: string;
@@ -78,9 +64,18 @@ function createDataset(data: ISearchResultDto | null) {
       _labels.push(`${dateStr} (${dayOfWeek})`);
     }
 
+    const nameCounter: {[key: string]: number} = {};
     arr.forEach((item, index) => {
+      let label;
+      if (nameCounter[item.name]) {
+        nameCounter[item.name]++;
+        label = `${item.name}: ${nameCounter[item.name]}`;
+      } else {
+        nameCounter[item.name] = 1;
+        label = item.name;
+      }
       const _d: IDatasetItem = {
-        label: item.name,
+        label,
         data: [],
         backgroundColor: backgroundColors[index % backgroundColors.length],
         borderColor: 'rgba(0, 0, 0, 0)',
