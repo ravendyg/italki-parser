@@ -1,8 +1,6 @@
 import React, {
   useState,
-  FormEvent,
   useEffect,
-  ChangeEvent,
 } from 'react';
 import { ISearchDto } from '../types/dto';
 import {
@@ -11,6 +9,7 @@ import {
   EPeriod,
 } from '../types/common-enums';
 import { getCountryName } from '../utils/get-country-name';
+import { EDisplayMode } from '../utils/createDataset';
 
 
 // function getSelectCountryFirstOption(currentlySelected: any) {
@@ -39,11 +38,16 @@ const defaultLang = localStorage.getItem('italki-def-lang') as ELanguage || ELan
 const defaultCountry = localStorage.getItem('italki-def-co') as ECountry || emptySelectionValue;
 const defaultPeriod = localStorage.getItem('italki-def-period') as EPeriod || EPeriod.WEEK;
 
-export default function Form({
-  setQuery
-}: {
+export interface IFormProps {
   setQuery: (args: ISearchDto) => void;
-}) {
+  displayMode: EDisplayMode;
+  setDisplayMode: (mode: EDisplayMode) => void;
+}
+export default function Form({
+  setQuery,
+  displayMode,
+  setDisplayMode,
+}: IFormProps) {
   const [lang, setLang] = useState(defaultLang);
   const [co, setCo] = useState(defaultCountry);
   const [period, setPeriod] = useState(defaultPeriod);
@@ -136,6 +140,23 @@ export default function Form({
                 >{(period === EPeriod.MONTHS
                   ? '3 MONTHS'
                   : period.toUpperCase())}</option>)}
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div className="field is-horizontal">
+          <div className="field-label is-normal">
+            <label className="label">Display mode</label>
+          </div>
+          <div className="field-body">
+            <div className="select">
+              <select
+                value={displayMode}
+                onChange={e => setDisplayMode(e.target.value as any)}
+              >
+                <option value={EDisplayMode.VALUES}>Values</option>
+                <option value={EDisplayMode.INCREMENT}>Increment</option>
               </select>
             </div>
           </div>
