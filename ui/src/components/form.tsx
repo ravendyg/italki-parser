@@ -2,6 +2,7 @@ import React, {
   useState,
   FormEvent,
   useEffect,
+  ChangeEvent,
 } from 'react';
 import { ISearchDto } from '../types/dto';
 import {
@@ -57,20 +58,15 @@ export default function Form({
 
   useEffect(() => {
     cb();
-  }, []);
-
-  const handleSubmit = (e: FormEvent) => {
-    e.preventDefault();
-    cb();
-  };
+  }, [lang, co, period]);
 
   return <section className='section' id='form'>
     <div className='container'>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={e => e.preventDefault()}>
 
         <div className="field is-horizontal">
           <div className="field-label is-normal">
-            <label className="label">Language (required)</label>
+            <label className="label">Language</label>
           </div>
           <div className="field-body">
             <div className="field">
@@ -94,7 +90,7 @@ export default function Form({
 
         <div className="field is-horizontal">
           <div className="field-label is-normal">
-            <label className="label">Country (optional)</label>
+            <label className="label">Country</label>
           </div>
           <div className="field-body">
             <div className="field">
@@ -145,13 +141,6 @@ export default function Form({
           </div>
         </div>
 
-        <div className="field is-grouped">
-          <p className="control">
-            <button className="button is-primary">
-              Update
-          </button>
-          </p>
-        </div>
       </form>
     </div>
   </section>;
