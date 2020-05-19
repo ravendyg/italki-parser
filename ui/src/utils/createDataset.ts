@@ -24,6 +24,11 @@ export enum EDisplayMode {
   CUMULATIVE = 'cumulative',
 }
 
+export enum EAccMode {
+  NONE = 'none',
+  SUM = 'sum',
+}
+
 export interface IDatasetItem {
   label: string;
   data: number[];
@@ -55,6 +60,7 @@ let _previousData: ISearchResultDto | null = null;
 export function createDataset(
   data: ISearchResultDto,
   displayMode: EDisplayMode,
+  accMode: EAccMode,
 ): [string[], IDatasetItem[]] {
 
   if (data === _previousData) {
@@ -86,8 +92,7 @@ export function createDataset(
 
   const nameCounter: { [key: string]: number } = {};
   arr.forEach((item, index) => {
-    let label;
-    if (nameCounter[item.name]) {
+    let label;if (nameCounter[item.name]) {
       nameCounter[item.name]++;
       label = `${item.name}: ${nameCounter[item.name]}`;
     } else {
@@ -138,6 +143,27 @@ export function createDataset(
 
     _datasets.push(_d);
   });
+
+  // Better move this logic to the server side?
+  if (accMode === EAccMode.SUM
+    // otherwise nothing to accumulate
+    && _datasets.length > 0
+  ) {
+    const _d: IDatasetItem = {
+      label: 'Total',
+      data: [],
+      backgroundColor: backgroundColors[0],
+      borderColor: 'rgba(0, 0, 0, 0)',
+    };
+    for (let timeCursor = 0; timeCursor < _datasets[0].data.length; timeCursor++) {
+      let valueAcc = 0;
+      for (let teacherCursor = 0; teacherCursor < _datasets.length; teacherCursor++) {
+        valueAcc += _datasets[teacherCursor].data[timeCursor];
+      }
+      _d.data.push(valueAcc);
+    }
+    _datasets = [_d];
+  }
 
   return [_labels, _datasets];
 }

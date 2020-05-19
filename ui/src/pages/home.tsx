@@ -4,15 +4,23 @@ import React, {
 } from 'react';
 import Form from '../components/form';
 import Graph from '../components/graph';
-import { ISearchResultDto, ISearchDto } from '../types/dto';
+import {
+  ISearchResultDto,
+  ISearchDto,
+} from '../types/dto';
 import { http } from '../services/http';
-import { createDataset, EDisplayMode } from '../utils/createDataset';
+import {
+  createDataset,
+  EDisplayMode,
+  EAccMode,
+} from '../utils/createDataset';
 
 
 function Home() {
   const [isLoading, setLoading] = useState(false);
   const [data, setData] = useState(null as ISearchResultDto | null);
   const [displayMode, setDisplayMode] = useState(EDisplayMode.VALUES);
+  const [accMode, setAccMode] = useState(EAccMode.NONE);
 
   const setQuery = async (query: ISearchDto) => {
     if (isLoading || !query) return;
@@ -26,7 +34,11 @@ function Home() {
 
   let graph = null;
   if (data) {
-    const [labels, datasets] = createDataset(data, displayMode);
+    const [labels, datasets] = createDataset(
+      data,
+      displayMode,
+      accMode,
+    );
     const count = data.teachers.length;
     const total = data.total;
 
@@ -43,6 +55,8 @@ function Home() {
       setQuery={setQuery}
       displayMode={displayMode}
       setDisplayMode={setDisplayMode}
+      accMode={accMode}
+      setAccMode={setAccMode}
     />
     {graph}
   </Fragment>;

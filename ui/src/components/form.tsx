@@ -9,7 +9,10 @@ import {
   EPeriod,
 } from '../types/common-enums';
 import { getCountryName } from '../utils/get-country-name';
-import { EDisplayMode } from '../utils/createDataset';
+import {
+  EDisplayMode,
+  EAccMode,
+} from '../utils/createDataset';
 
 
 // function getSelectCountryFirstOption(currentlySelected: any) {
@@ -37,11 +40,15 @@ export interface IFormProps {
   setQuery: (args: ISearchDto) => void;
   displayMode: EDisplayMode;
   setDisplayMode: (mode: EDisplayMode) => void;
+  accMode: EAccMode;
+  setAccMode: (AccMode: EAccMode) => void;
 }
 export default function Form({
   setQuery,
   displayMode,
   setDisplayMode,
+  accMode,
+  setAccMode,
 }: IFormProps) {
   const [lang, setLang] = useState(defaultLang);
   const [co, setCo] = useState(defaultCountry);
@@ -152,6 +159,26 @@ export default function Form({
                 <option value={EDisplayMode.INCREMENT}>Increment</option>
                 <option value={EDisplayMode.CUMULATIVE}>Cumulative</option>
               </select>
+            </div>
+          </div>
+        </div>
+
+        <div className="field is-horizontal">
+          <div className="field-label">
+            <label htmlFor="acc-check" className="label">Accumulate</label>
+          </div>
+          <div className="field-body">
+            <div className="field">
+              <div className="control">
+                <label className="checkbox">
+                  <input
+                    id='acc-check'
+                    type="checkbox"
+                    value={accMode === EAccMode.SUM ? 'checked' : ''}
+                    onChange={() => {setAccMode(accMode === EAccMode.SUM ? EAccMode.NONE : EAccMode.SUM)}}
+                  />
+                </label>
+              </div>
             </div>
           </div>
         </div>
