@@ -35,7 +35,7 @@ CREATE TABLE teachers (
   id INT PRIMARY KEY NOT NULL,
   name VARCHAR(64),
   country VARCHAR(6),
-  schedule INT DEFAULT 10
+  schedule INT DEFAULT -30
 );
 
 CREATE TABLE languages (
