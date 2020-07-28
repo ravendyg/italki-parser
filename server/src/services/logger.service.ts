@@ -1,4 +1,6 @@
 import { Injectable } from '@nestjs/common';
+import { EDebugLevel } from 'types/types';
+import { config } from '../config';
 
 
 @Injectable()
@@ -7,12 +9,18 @@ export class Logger {
     console.log(...args);
   }
   error(...args) {
-    console.error(...args);
+    if (config.DEBUG_LEVEL <= EDebugLevel.ERROR) {
+      console.error(...args);
+    }
   }
   debug(...args) {
-    console.debug(...args);
+    if (config.DEBUG_LEVEL <= EDebugLevel.DEBUG) {
+      console.debug(...args);
+    }
   }
   info(...args) {
-    console.info(...args);
+    if (config.DEBUG_LEVEL <= EDebugLevel.INFO) {
+      console.info(...args);
+    }
   }
 }

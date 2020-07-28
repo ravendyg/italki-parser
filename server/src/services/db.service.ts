@@ -234,7 +234,9 @@ export class DbService {
       }
       return res.rows[0].week as number;
     } catch (e) {
-      this.logger.error('getJobWeek', e);
+      if (e.code !== 22021) {
+        this.logger.error('getJobWeek', e);
+      }
       return null;
     } finally {
       client.release();

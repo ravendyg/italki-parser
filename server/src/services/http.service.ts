@@ -6,13 +6,15 @@ import {
 } from 'types/types';
 import { Logger } from './logger.service';
 import { IItalkiCourseDto, IItalkiScheduleDto } from 'types/dto';
+import { asyncWait } from 'src/utils/asyncWait';
+import { constants } from 'src/constants';
 
 
 @Injectable()
 export class Http {
-  constructor(
+  constructor (
     private logger: Logger
-  ) {}
+  ) { }
 
   async getLanguage(job: TLangJob): Promise<[IItalkiCourseDto[], boolean]> {
     const {
@@ -65,21 +67,24 @@ export class Http {
       to,
     } = job;
     const url = `https://www.italki.com/api/v2/teacher/${id}/schedule?`
-    + `start_time=${from.toISOString()}&end_time=${to.toISOString()}`
-    console.log(url);
-    try {
-      const {
-        status,
-        data: { data },
-      } = await axios.get(url)
-      if (status !== 200) {
-        this.logger.error(`getSchedule: ${id} ${from} ${to} status ${status}`, data);
-        return null;
-      }
+      + `start_time=${from.toISOString()}&end_time=${to.toISOString()}`
 
-      return data;
-    } catch (e) {
-      this.logger.error(`getSchedule: ${id} ${from} ${to}`, e);
+    for (let attempt = 1; attempt < 5; attempt++) {
+      try {
+        const {
+          status,
+          data: { data },
+        } = await axios.get <{data: IItalkiScheduleDto}>(url)
+        if (status !== 200) {
+          this.logger.error(`getSchedule: ${id} ${from} ${to} status ${status} att: ${attempt}`, data);
+        } else {
+          this.logger.info(`fetched schedule ${url}. T les: ${data.teacher_lesson.length}, A les: ${data.available_schedule.length}`);
+          return data;
+        }
+      } catch (e) {
+        this.logger.error(`getSchedule: ${id} ${from} ${to} att: ${attempt}`, e);
+      }
+      await asyncWait(10 * constants.SECOND);
     }
   }
 }

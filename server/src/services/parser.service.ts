@@ -104,7 +104,6 @@ export class Parser {
 
       case 'schedule': {
         const schedule = await this.http.getSchedule(job);
-        console.log(schedule);
         if (schedule) {
           const acc = new Map<string, number>();
           for (const item of schedule.teacher_lesson) {
