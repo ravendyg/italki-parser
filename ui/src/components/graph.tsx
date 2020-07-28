@@ -1,88 +1,43 @@
 import React, {
 } from 'react';
 import { Line } from 'react-chartjs-2';
-import { ISearchResultDto } from "../types/dto";
-import { constants } from '../constants';
+import { IDatasetItem } from '../utils/createDataset';
 
 
-interface IDatasetItem {
-  label: string;
-  data: number[];
+interface IGraphProps {
+  count: number;
+  total: number;
+  labels: string[];
+  datasets: IDatasetItem[];
 }
+export default function Graph(props: IGraphProps) {
+  const {
+    count,
+    datasets,
+    labels,
+    total,
+  } = props;
 
-let _labels: string[] = [];
-let _datasets: IDatasetItem[] = [];
-let _previousData: ISearchResultDto | null = null;
-function createDataset(data: ISearchResultDto | null) {
-  if (data === _previousData) {
-    return [_labels, _datasets];
-  }
-
-  if (data !== null) {
-    _labels = [];
-    _datasets = [];
-    // const arr = data.teachers.slice(0, 3);
-    const arr = data.teachers;
-    const {
-      from,
-      to,
-      // period,
-    } = data;
-    let step: number = constants.DAY;
-    // TODO: implement aggregation on the server
-    // switch (period) {
-    //   case EPeriod.MONTHS: {
-    //     step = step * 7; // weeks
-    //     break;
-    //   }
-    // }
-    for (
-      let dateNum = new Date(from).getTime();
-      dateNum <= new Date(to).getTime();
-      dateNum += step
-    ) {
-      const date = new Date(dateNum)
-      const dateStr = date.toISOString().slice(0, 10)
-      const dayOfWeek = constants.DAY_OF_WEEK[date.getDay()];
-      _labels.push(`${dateStr} (${dayOfWeek})`);
-    }
-
-    arr.forEach(item => {
-      const _d: IDatasetItem = {
-        label: item.name,
-        data: [],
-      };
-      for (
-        let date = new Date(from).getTime();
-        date <= new Date(to).getTime();
-        date += step
-      ) {
-        const key = new Date(date).toISOString().slice(0, 10);
-        const point = item.lessons[key] || 0;
-        _d.data.push(point / 100);
-      }
-      _datasets.push(_d);
-    });
-  }
-
-  return [_labels, _datasets];
-}
-
-export default function Graph({ data }: { data: ISearchResultDto | null }) {
-  const [labels, datasets] = createDataset(data);
-
-  console.log(datasets)
   return <section className="section">
     <div className='container'>
 
-      {data && `Displayed ${data.teachers.length} out of ${data.total}`}
+      {`Displayed ${count} out of ${total}`}
 
-      {data && <Line
+      <Line
         data={{
           labels,
           datasets,
         }}
-      />}
+        options={{
+          scales: {
+            yAxes: [{
+              ticks: {
+                beginAtZero: true,
+              }
+            }]
+          }
+        }}
+      />
     </div>
   </section>;
 }

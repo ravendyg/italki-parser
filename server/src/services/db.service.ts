@@ -47,17 +47,50 @@ const makeCountTeachers = (filterByCountry: boolean) => {
   ;`
 };
 
-const makeGetLessonsQuery = (ids: number[]) => {
+enum ETruncPeriod {
+  DAY = 'day',
+  WEEK = 'week',
+  MONTH = 'month',
+}
+const UPDATE_TEACHER_WEEK = `
+  UPDATE teachers
+  SET schedule = $1
+  WHERE id = $2
+;`;
+
+const makeGetLessonsQuery = (ids: number[], period: EPeriod) => {
+  let truncPeriod: ETruncPeriod;
+  switch (period) {
+    case EPeriod.MONTH: {
+      truncPeriod = ETruncPeriod.WEEK;
+      break;
+    }
+
+    case EPeriod.MONTHS: {
+      truncPeriod = ETruncPeriod.WEEK;
+      break;
+    }
+
+    case EPeriod.YEAR: {
+      truncPeriod = ETruncPeriod.MONTH;
+      break;
+    }
+
+    default: {
+      truncPeriod = ETruncPeriod.DAY;
+    }
+  }
   return `
     SELECT
       teacher,
-      date,
-      total
+      date_trunc('${truncPeriod}', date) AS new_date,
+      SUM(total) AS total
     FROM lessons
     WHERE
       teacher IN (${ids.join(',')})
       AND date >= $1::DATE
       AND date < $2::DATE
+    GROUP BY teacher, new_date
   ;`
 };
 
@@ -159,14 +192,19 @@ export class DbService {
         teachersMap.set(teacherId, {});
       }
       const getLessongArgs = [from, to];
-      const getLessonsQuery = makeGetLessonsQuery(teachers);
+      const getLessonsQuery = makeGetLessonsQuery(teachers, period);
       const lesRes = await client.query(getLessonsQuery, getLessongArgs);
 
+      let minTruncatedDate;
       // format
       for (const row of lesRes.rows) {
         const lessons = teachersMap.get(row.teacher);
-        lessons[this.newDate.removeTime(row.date)] = row.total;
+        if (!(minTruncatedDate < row.new_date)) {
+          minTruncatedDate = row.new_date;
+        }
+        lessons[this.newDate.removeTime(row.new_date)] = (+row.total) || 0;
       }
+
       for (const teacher of resGet.rows) {
         const teacherDto: ITeacherDto = {
           id: teacher.id,
@@ -175,6 +213,9 @@ export class DbService {
         };
         result.teachers.push(teacherDto);
       }
+
+      // reset min date according to truncate periods
+      result.from = this.newDate.removeTime(minTruncatedDate);
     } catch (e) {
       this.logger.error(`getTeachers: ${lang}, ${co}`, e);
     } finally {
@@ -254,12 +295,14 @@ export class DbService {
   async createLessons(
     teacherId: number,
     acc: Map<string, number>,
+    week: number,
   ) {
     const client = await pgPool.connect();
     try {
       for (const [key, hours] of acc.entries()) {
         const args = [teacherId, new Date(key), hours];
         await client.query(CREATE_LESSONS_QUERY, args);
+        await client.query(UPDATE_TEACHER_WEEK, [week, teacherId]);
       }
     } catch (e) {
       this.logger.error('createLessons', teacherId, acc, e);
