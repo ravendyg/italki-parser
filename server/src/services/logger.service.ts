@@ -5,22 +5,25 @@ import { config } from '../config';
 
 @Injectable()
 export class Logger {
+  private getDate() {
+    return new Date().toISOString().slice(0, 19);
+  }
   log(...args) {
-    console.log(...args);
+    console.log(this.getDate(), ...args);
   }
   error(...args) {
     if (config.DEBUG_LEVEL <= EDebugLevel.ERROR) {
-      console.error(...args);
+      console.error(this.getDate(),...args);
     }
   }
   debug(...args) {
     if (config.DEBUG_LEVEL <= EDebugLevel.DEBUG) {
-      console.debug(...args);
+      console.debug(this.getDate(),...args);
     }
   }
   info(...args) {
     if (config.DEBUG_LEVEL <= EDebugLevel.INFO) {
-      console.info(...args);
+      console.info(this.getDate(),...args);
     }
   }
 }
